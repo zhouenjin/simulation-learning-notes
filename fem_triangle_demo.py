@@ -6,6 +6,14 @@ def sub(a, b):
     return [a[0] - b[0], a[1] - b[1]]
 
 
+def add(a, b):
+    return [a[0] + b[0], a[1] + b[1]]
+
+
+def mul(a, s):
+    return [a[0] * s, a[1] * s]
+
+
 def det2(m):
     return m[0][0] * m[1][1] - m[0][1] * m[1][0]
 
@@ -85,6 +93,18 @@ class TriangleCase:
         self.x1 = x1
         self.x2 = x2
         self.x3 = x3
+
+    def copied(self):
+        return TriangleCase(
+            self.name,
+            self.description,
+            self.X1[:],
+            self.X2[:],
+            self.X3[:],
+            self.x1[:],
+            self.x2[:],
+            self.x3[:],
+        )
 
 
 def make_case(name, description, X1, X2, X3, x1, x2, x3):
@@ -176,8 +196,38 @@ def analyze_case(case):
     }
 
 
+def energy_from_case(case, energy_mode):
+    result = analyze_case(case)
+    if energy_mode == "simple":
+        return result["energy_simple"]
+    return result["energy_corot"]
+
+
+def perturb_case(case, node_index, axis_index, delta):
+    new_case = case.copied()
+    nodes = [new_case.x1, new_case.x2, new_case.x3]
+    nodes[node_index][axis_index] += delta
+    return new_case
+
+
+def numerical_force(case, energy_mode, eps=1e-6):
+    forces = []
+    for node_index in range(3):
+        grad = [0.0, 0.0]
+        for axis_index in range(2):
+            case_plus = perturb_case(case, node_index, axis_index, eps)
+            case_minus = perturb_case(case, node_index, axis_index, -eps)
+            e_plus = energy_from_case(case_plus, energy_mode)
+            e_minus = energy_from_case(case_minus, energy_mode)
+            grad[axis_index] = (e_plus - e_minus) / (2.0 * eps)
+        forces.append(mul(grad, -1.0))
+    return forces
+
+
 def print_case(case):
     result = analyze_case(case)
+    simple_forces = numerical_force(case, "simple")
+    corot_forces = numerical_force(case, "corot")
 
     print(f"Case: {case.name}")
     print(case.description)
@@ -214,6 +264,16 @@ def print_case(case):
     print()
     print(f"co-rotational psi(F) = 0.5 * ||F - R||_F^2 = {result['psi_corot']:.6f}")
     print(f"co-rotational element energy E = A0 * psi(F) = {result['energy_corot']:.6f}")
+    print()
+    print("Numerical nodal forces from simple energy:")
+    print(f"  f1 = {format_vec(simple_forces[0])}")
+    print(f"  f2 = {format_vec(simple_forces[1])}")
+    print(f"  f3 = {format_vec(simple_forces[2])}")
+    print()
+    print("Numerical nodal forces from co-rotational energy:")
+    print(f"  f1 = {format_vec(corot_forces[0])}")
+    print(f"  f2 = {format_vec(corot_forces[1])}")
+    print(f"  f3 = {format_vec(corot_forces[2])}")
 
 
 def print_case_list():
