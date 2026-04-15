@@ -35,3 +35,11 @@ python D:\学习\编程学习\具身智能\rope_demos\xpbd_rope_demo.py --mode t
 python D:\学习\编程学习\具身智能\具身智能\rope_demos\fem_triangle_demo.py --mode all
 python D:\学习\编程学习\具身智能\具身智能\rope_demos\fem_triangle_demo.py --case rotate
 ```
+
+## License
+
+本仓库内容采用 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) 许可协议：
+
+- 允许转载、分享、改编
+- 需要保留署名
+- 不允许商业使用
